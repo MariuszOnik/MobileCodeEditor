@@ -85,7 +85,7 @@ async function ensureDefaultProject() {
 
   await writeFile('main.ts', `import Phaser from 'phaser'
 
-const config: Phaser.Types.Core.GameConfig = {
+new Phaser.Game({
   type: Phaser.AUTO,
   width: window.innerWidth,
   height: window.innerHeight,
@@ -93,16 +93,14 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: {
     create(this: Phaser.Scene) {
       this.add.text(
-        Number(config.width) / 2,
-        Number(config.height) / 2,
+        window.innerWidth / 2,
+        window.innerHeight / 2,
         'Hello Mobile IDE!\\n\\nEdytuj main.ts i kliknij ▶',
         { fontSize: '24px', color: '#00ffcc', align: 'center' }
       ).setOrigin(0.5)
     }
   }
-}
-
-new Phaser.Game(config)
+})
 `)
 }
 

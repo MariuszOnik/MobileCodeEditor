@@ -15,8 +15,27 @@ declare module 'phaser' {
   export = Phaser;
 }
 declare namespace Phaser {
-  class Game { constructor(config: any); destroy(removeCanvas: boolean): void; }
+  class Game { constructor(config: Types.Core.GameConfig | any); destroy(removeCanvas: boolean): void; }
   class Scene { add: GameObjects.GameObjectFactory; physics: Physics.Arcade.ArcadePhysics; input: Input.InputPlugin; cameras: Cameras.Scene2D.CameraManager; time: Time.Clock; load: Loader.LoaderPlugin; create(): void; update(): void; preload(): void; }
+  namespace Types {
+    namespace Core {
+      interface GameConfig {
+        type?: number;
+        width?: number | string;
+        height?: number | string;
+        backgroundColor?: string | number;
+        scene?: any;
+        physics?: { default?: string; arcade?: { gravity?: { x?: number; y?: number }; debug?: boolean } };
+        scale?: { mode?: number; autoCenter?: number; width?: number | string; height?: number | string };
+        parent?: string | HTMLElement;
+        audio?: any;
+        fps?: any;
+        render?: any;
+        input?: any;
+        banner?: any;
+      }
+    }
+  }
   namespace GameObjects {
     interface GameObjectFactory {
       image(x: number, y: number, key: string): Image;
