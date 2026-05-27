@@ -25,7 +25,6 @@ export class AssetPanel {
   private render(): void {
     this.el.innerHTML = ''
 
-    // Header
     const header = document.createElement('div')
     header.className = 'ft-header'
     header.innerHTML = `
@@ -63,7 +62,7 @@ export class AssetPanel {
     for (const asset of this.assets) {
       const card = document.createElement('div')
       card.className = 'asset-card'
-      card.title = `${asset.name}\nKliknij → kopiuj import`
+      card.title = `${asset.name} — kliknij aby skopiować kod`
 
       if (asset.type === 'image') {
         card.innerHTML = `
@@ -85,17 +84,10 @@ export class AssetPanel {
         `
       }
 
-      // Click card → copy import snippet to clipboard
-      card.addEventListener('click', async (e) => {
+      card.addEventListener('click', (e) => {
         if ((e.target as HTMLElement).classList.contains('asset-del')) return
-        const snippet = `import ${asset.key}Url from './${asset.name}'`
-        try {
-          await navigator.clipboard.writeText(snippet)
-          const name = card.querySelector('.asset-name')!
-          const orig = name.textContent
-          name.textContent = '✓ Skopiowano!'
-          setTimeout(() => { name.textContent = orig }, 1200)
-        } catch { /* ignore */ }
+        e.stopPropagation()
+        this.showSnippetPopup(asset)
       })
 
       card.querySelector('.asset-del')!.addEventListener('click', async (e) => {
@@ -109,4 +101,74 @@ export class AssetPanel {
       grid.appendChild(card)
     }
   }
+
+  private showSnippetPopup(asset: Asset): void {
+    document.querySelector('.asset-snippet-popup')?.remove()
+
+    const esmSnippet = `import ${asset.key}Url from './${asset.name}'`
+    const jsPath = `'./${asset.name}'`
+
+    const popup = document.createElement('div')
+    popup.className = 'asset-snippet-popup'
+    popup.innerHTML = `
+      <button class="asp-close">✕</button>
+      <div class="asp-title">${asset.name}</div>
+      <div class="asp-group">
+        <div class="asp-label">ESM / TypeScript (import)</div>
+        <div class="asp-snippet-row">
+          <code class="asp-code asp-esm"></code>
+          <button class="asp-copy">📋</button>
+        </div>
+      </div>
+      <div class="asp-group">
+        <div class="asp-label">Ścieżka — plain JS / HTML</div>
+        <div class="asp-snippet-row">
+          <code class="asp-code asp-js"></code>
+          <button class="asp-copy">📋</button>
+        </div>
+      </div>
+    `
+
+    popup.querySelector('.asp-esm')!.textContent = esmSnippet
+    popup.querySelector('.asp-js')!.textContent = jsPath
+
+    const btns = popup.querySelectorAll<HTMLButtonElement>('.asp-copy')
+    btns[0].addEventListener('click', (e) => { e.stopPropagation(); copyText(esmSnippet, btns[0]) })
+    btns[1].addEventListener('click', (e) => { e.stopPropagation(); copyText(jsPath, btns[1]) })
+
+    popup.querySelector('.asp-close')!.addEventListener('click', (e) => {
+      e.stopPropagation()
+      popup.remove()
+    })
+
+    document.body.appendChild(popup)
+
+    const dismiss = (e: MouseEvent) => {
+      if (!popup.contains(e.target as Node)) {
+        popup.remove()
+        document.removeEventListener('click', dismiss)
+      }
+    }
+    setTimeout(() => document.addEventListener('click', dismiss), 10)
+  }
+}
+
+async function copyText(text: string, btn: HTMLButtonElement): Promise<void> {
+  let ok = false
+  try {
+    await navigator.clipboard.writeText(text)
+    ok = true
+  } catch {
+    // Fallback: textarea + execCommand (works on mobile without clipboard permission)
+    const ta = document.createElement('textarea')
+    ta.value = text
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none'
+    document.body.appendChild(ta)
+    ta.focus()
+    ta.select()
+    try { ok = document.execCommand('copy') } catch { ok = false }
+    ta.remove()
+  }
+  btn.textContent = ok ? '✓' : '✗'
+  setTimeout(() => { btn.textContent = '📋' }, 1400)
 }

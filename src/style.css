@@ -130,6 +130,29 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .asset-card:hover .asset-del, .asset-card:active .asset-del { opacity: 1; }
 .asset-empty { color: var(--text-dim); font-size: 12px; text-align: center; padding: 24px 12px; line-height: 1.6; }
 
+/* ── Asset snippet popup ── */
+.asset-snippet-popup {
+  position: fixed;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(360px, 94vw);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 12px 12px;
+  z-index: 1000;
+  box-shadow: 0 8px 40px #000a;
+}
+.asp-close { position: absolute; top: 8px; right: 10px; border: none; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 18px; line-height: 1; }
+.asp-title { font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 10px; padding-right: 24px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.asp-group { margin-bottom: 8px; }
+.asp-label { font-size: 10px; color: var(--text-dim); margin-bottom: 4px; letter-spacing: .04em; }
+.asp-snippet-row { display: flex; align-items: center; gap: 6px; background: var(--bg3); border-radius: 6px; padding: 6px 8px; border: 1px solid var(--border); }
+.asp-code { flex: 1; font-size: 11px; font-family: 'Fira Mono', 'Consolas', monospace; color: var(--text); word-break: break-all; user-select: text; -webkit-user-select: text; }
+.asp-copy { flex-shrink: 0; border: none; background: transparent; color: var(--accent); cursor: pointer; font-size: 18px; padding: 2px 4px; border-radius: 4px; -webkit-tap-highlight-color: transparent; }
+.asp-copy:active { background: var(--bg); }
+
 /* ── Panels ── */
 #editor-container, #run-container {
   flex: 1;
