@@ -76,6 +76,37 @@ async function init() {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveCurrentFile() }
   })
 
+  // Paste fix: intercept document paste and forward to Monaco
+  // Handles mobile context-menu "Paste" and cases where Monaco loses focus
+  document.addEventListener('paste', (e) => {
+    if (!monacoEditor) return
+    const text = e.clipboardData?.getData('text/plain')
+    if (!text) return
+    // If Monaco already handled it (has focus), do nothing
+    if (monacoEditor.hasTextFocus()) return
+    e.preventDefault()
+    monacoEditor.focus()
+    monacoEditor.executeEdits('paste', [{
+      range: monacoEditor.getSelection()!,
+      text,
+    }])
+  })
+
+  // Paste button for mobile (clipboard API)
+  document.getElementById('btn-paste')?.addEventListener('click', async () => {
+    try {
+      const text = await navigator.clipboard.readText()
+      if (!text || !monacoEditor) return
+      monacoEditor.focus()
+      monacoEditor.executeEdits('paste', [{
+        range: monacoEditor.getSelection()!,
+        text,
+      }])
+    } catch {
+      setStatus('Brak dostępu do schowka', 'error')
+    }
+  })
+
   // Mobile keyboard: shrink app to visible viewport so editor stays above keyboard
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', onViewportResize)
@@ -152,7 +183,6 @@ async function saveCurrentFile() {
 // ── Run ───────────────────────────────────────────────────────────────────────
 async function runProject() {
   await saveCurrentFile()
-
   setStatus('Kompilowanie…', 'info')
   switchPanel('run')
 
@@ -163,9 +193,24 @@ async function runProject() {
     if (content !== null) allFiles[path] = content
   }
 
+  // Detect project folder from current file (e.g. "Gra1/main.ts" → "Gra1/")
+  const folder = currentPath?.includes('/')
+    ? currentPath.split('/').slice(0, -1).join('/') + '/'
+    : ''
+
+  // Classic HTML mode: if project has index.html, inline local scripts and run directly
+  const htmlKey = folder ? `${folder}index.html` : 'index.html'
+  const templateHtml = allFiles[htmlKey]
+  if (templateHtml) {
+    const html = inlineLocalScripts(templateHtml, allFiles, folder)
+    setStatus('Uruchomiono ▶ (HTML)', 'ok')
+    runCode({ html, container: runEl })
+    return
+  }
+
+  // ESM mode: compile with esbuild
   const entry = currentPath ?? files[0]
   const result = await compile(allFiles, entry)
-
   if (result.errors?.length) {
     setStatus('Błąd: ' + result.errors[0], 'error')
     switchPanel('editor')
@@ -174,6 +219,16 @@ async function runProject() {
 
   setStatus('Uruchomiono ▶', 'ok')
   runCode({ code: result.code!, container: runEl })
+}
+
+function inlineLocalScripts(html: string, files: Record<string, string>, folder: string): string {
+  // Replace <script src="file.js"></script> with inlined content
+  return html.replace(/<script\s+src="([^"]+)"\s*><\/script>/gi, (match, src) => {
+    const key = src.startsWith('./') ? folder + src.slice(2) : folder + src
+    const content = files[key] ?? files[src]
+    if (content !== undefined) return `<script>\n${content}\n</script>`
+    return match  // external URL — keep as-is
+  })
 }
 
 // ── UI helpers ────────────────────────────────────────────────────────────────
