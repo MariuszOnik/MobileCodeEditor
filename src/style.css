@@ -296,6 +296,34 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 }
 #app.sidebar-open #sidebar-backdrop { display: block; }
 
+/* ── Editor menu popup ── */
+.editor-menu-popup {
+  position: fixed;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 0;
+  z-index: 500;
+  min-width: 180px;
+  box-shadow: 0 6px 24px #000a;
+}
+.emp-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+.emp-item:hover, .emp-item:active { background: var(--bg3); }
+.emp-icon { font-size: 16px; min-width: 20px; text-align: center; }
+
 /* ── Mini dialogs (replaces confirm/prompt blocked in iOS PWA) ── */
 .mini-overlay {
   position: fixed; inset: 0;

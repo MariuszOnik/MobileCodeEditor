@@ -6,6 +6,7 @@ import { AssetPanel } from './ui/asset-panel'
 import { ConsolePanel } from './ui/console-panel'
 import { runCode, stopCode } from './runtime/runner'
 import { on, Events } from './ui/events'
+import { miniConfirm } from './ui/dialogs'
 import CompilerWorker from './compiler/compiler.worker?worker'
 
 // ── Compiler worker ──────────────────────────────────────────────────────────
@@ -123,6 +124,11 @@ async function init() {
 
   document.getElementById('btn-zoom-in')!.addEventListener('click',  () => applyFontSize(fontSize + FONT_STEP))
   document.getElementById('btn-zoom-out')!.addEventListener('click', () => applyFontSize(fontSize - FONT_STEP))
+
+  document.getElementById('btn-editor-menu')!.addEventListener('click', (e) => {
+    e.stopPropagation()
+    showEditorMenu(document.getElementById('btn-editor-menu')!)
+  })
 
   // Auto-save on Ctrl+S
   document.addEventListener('keydown', e => {
@@ -349,6 +355,61 @@ function switchSidebarTab(tab: 'files' | 'assets') {
 function setStatus(msg: string, type: 'ok' | 'error' | 'info') {
   statusEl.textContent = msg
   statusEl.className = `status status-${type}`
+}
+
+function showEditorMenu(anchor: HTMLElement): void {
+  document.querySelector('.editor-menu-popup')?.remove()
+
+  const popup = document.createElement('div')
+  popup.className = 'editor-menu-popup'
+
+  const items: { label: string; icon: string; action: () => void }[] = [
+    {
+      label: 'Zaznacz wszystko',
+      icon: '⊡',
+      action: () => {
+        monacoEditor?.focus()
+        monacoEditor?.trigger('menu', 'editor.action.selectAll', null)
+        popup.remove()
+      },
+    },
+    {
+      label: 'Wyczyść plik',
+      icon: '🗑',
+      action: async () => {
+        popup.remove()
+        if (!monacoEditor || !currentPath) return
+        const ok = await miniConfirm(`Wyczyścić całą zawartość pliku „${currentPath}"?`)
+        if (!ok) return
+        monacoEditor.setValue('')
+        monacoEditor.focus()
+        setStatus('Plik wyczyszczony', 'info')
+      },
+    },
+  ]
+
+  for (const item of items) {
+    const btn = document.createElement('button')
+    btn.className = 'emp-item'
+    btn.innerHTML = `<span class="emp-icon">${item.icon}</span><span>${item.label}</span>`
+    btn.addEventListener('click', (e) => { e.stopPropagation(); item.action() })
+    popup.appendChild(btn)
+  }
+
+  document.body.appendChild(popup)
+
+  // Position below anchor button
+  const rect = anchor.getBoundingClientRect()
+  popup.style.top  = `${rect.bottom + 4}px`
+  popup.style.left = `${Math.min(rect.left, window.innerWidth - popup.offsetWidth - 8)}px`
+
+  const dismiss = (e: MouseEvent) => {
+    if (!popup.contains(e.target as Node)) {
+      popup.remove()
+      document.removeEventListener('click', dismiss)
+    }
+  }
+  setTimeout(() => document.addEventListener('click', dismiss), 10)
 }
 
 async function openNativeDir() {
