@@ -1,4 +1,4 @@
-import { listFiles, writeFile, deleteFile } from '../fs/virtual-fs'
+import { listFiles, writeFile, deleteFile, renameFile } from '../fs/virtual-fs'
 import { emit, Events } from './events'
 import { miniConfirm, miniPrompt } from './dialogs'
 
@@ -149,9 +149,23 @@ export class FileTree {
         item.innerHTML = `
           <span class="ft-icon">${icon}</span>
           <span class="ft-name">${node.name}</span>
+          <button class="ft-btn ft-rename" title="Zmień nazwę">✎</button>
           <button class="ft-btn ft-del" title="Usuń">✕</button>
         `
         item.querySelector('.ft-name')!.addEventListener('click', () => emit(Events.FILE_OPEN, node.path))
+        item.querySelector('.ft-rename')!.addEventListener('click', async (e) => {
+          e.stopPropagation()
+          const parts = node.path.split('/')
+          const newName = await miniPrompt('Nowa nazwa pliku:', parts[parts.length - 1])
+          if (!newName?.trim() || newName.trim() === parts[parts.length - 1]) return
+          parts[parts.length - 1] = newName.trim()
+          const newPath = parts.join('/')
+          await renameFile(node.path, newPath)
+          emit(Events.FILE_DELETE, node.path)
+          emit(Events.FILE_CREATE, newPath)
+          await this.refresh()
+          emit(Events.FILE_OPEN, newPath)
+        })
         item.querySelector('.ft-del')!.addEventListener('click', async (e) => {
           e.stopPropagation()
           const ok = await miniConfirm(`Usuń plik „${node.path}"?`)

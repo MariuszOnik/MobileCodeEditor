@@ -144,14 +144,16 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .ft-item.active { background: var(--bg3); border-left: 2px solid var(--accent); }
 .ft-icon { font-size: 14px; }
 .ft-name { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ft-del, .ft-add-here { width: 22px; height: 22px; border: none; border-radius: 3px; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 13px; opacity: 0; transition: opacity 0.1s; }
+.ft-del, .ft-rename, .ft-add-here { width: 22px; height: 22px; border: none; border-radius: 3px; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 13px; opacity: 0; transition: opacity 0.1s; }
 .ft-add-here { color: var(--accent); font-size: 16px; font-weight: bold; }
+.ft-rename { font-size: 15px; }
 .ft-item:hover .ft-del, .ft-item:active .ft-del,
+.ft-item:hover .ft-rename, .ft-item:active .ft-rename,
 .ft-item:hover .ft-add-here, .ft-item:active .ft-add-here { opacity: 1; }
 
 /* on touch screens there is no hover — always show action buttons */
 @media (hover: none) {
-  .ft-del, .ft-add-here { opacity: 1; }
+  .ft-del, .ft-rename, .ft-add-here { opacity: 1; }
 }
 
 /* ── Asset panel ── */

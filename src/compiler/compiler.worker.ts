@@ -31,6 +31,7 @@ self.onmessage = async (e: MessageEvent<CompileRequest>) => {
       write: false,
       format: 'esm',
       target: 'es2022',
+      jsx: 'automatic',
       plugins: [virtualFsPlugin(files)],
     })
 
@@ -70,7 +71,9 @@ function virtualFsPlugin(files: Record<string, string>): esbuild.Plugin {
         if (isAssetPath(args.path)) {
           return { contents: `export default ${JSON.stringify(content)}`, loader: 'js' }
         }
-        const loader = args.path.endsWith('.ts') ? 'ts' : 'js'
+        const ext = args.path.split('.').pop() ?? ''
+        const loader: esbuild.Loader =
+          ext === 'tsx' ? 'tsx' : ext === 'ts' ? 'ts' : ext === 'jsx' ? 'jsx' : 'js'
         return { contents: content, loader }
       })
 
@@ -100,7 +103,7 @@ function resolvePath(path: string): string {
 
 function findFile(files: Record<string, string>, path: string): string | null {
   if (files[path]) return path
-  for (const ext of ['.ts', '.js']) {
+  for (const ext of ['.ts', '.tsx', '.js', '.jsx']) {
     if (files[path + ext]) return path + ext
   }
   return null

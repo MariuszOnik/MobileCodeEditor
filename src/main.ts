@@ -273,12 +273,14 @@ async function runProject() {
     ? currentPath.split('/').slice(0, -1).join('/') + '/'
     : ''
 
-  // Classic HTML mode: if project has index.html, inline local scripts and run directly
-  const htmlKey = folder ? `${folder}index.html` : 'index.html'
-  const templateHtml = allFiles[htmlKey]
+  // Classic HTML mode: find any .html file in the project folder
+  const htmlKey = Object.keys(allFiles).find(k =>
+    k.endsWith('.html') && (folder ? k.startsWith(folder) : !k.includes('/'))
+  )
+  const templateHtml = htmlKey ? allFiles[htmlKey] : undefined
   if (templateHtml) {
     const html = inlineLocalScripts(templateHtml, allFiles, folder)
-    const buildInfo = buildInfoLine('HTML', htmlKey, html.length)
+    const buildInfo = buildInfoLine('HTML', htmlKey!, html.length)
     consolePanel?.setBuildInfo(buildInfo)
     setStatus('Uruchomiono ▶ (HTML)', 'ok')
     runCode({ html, container: runIframeEl})
