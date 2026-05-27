@@ -103,6 +103,8 @@ export function createEditor(
     theme: 'vs-dark',
     fontSize,
     minimap: { enabled: false },
+    glyphMargin: false,
+    folding: false,
     lineNumbers: 'on',
     lineNumbersMinChars: 3,
     lineDecorationsWidth: 0,
