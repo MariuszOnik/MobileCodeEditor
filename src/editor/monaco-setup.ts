@@ -48,20 +48,18 @@ declare namespace Phaser {
 
 const tsLang = (monaco.languages as any).typescript
 if (tsLang?.typescriptDefaults) {
+  const compilerOpts = {
+    target: tsLang.ScriptTarget?.ES2022 ?? 99,
+    module: tsLang.ModuleKind?.ESNext ?? 99,
+    allowNonTsExtensions: true,
+    allowSyntheticDefaultImports: true,
+    esModuleInterop: true,
+    checkJs: true,
+  }
   tsLang.typescriptDefaults.addExtraLib(ENGINE_DEFS, 'ts:engine-defs.d.ts')
-  tsLang.typescriptDefaults.setCompilerOptions({
-    target: tsLang.ScriptTarget?.ES2022 ?? 99,
-    module: tsLang.ModuleKind?.ESNext ?? 99,
-    allowNonTsExtensions: true,
-    checkJs: true,
-  })
+  tsLang.typescriptDefaults.setCompilerOptions(compilerOpts)
   tsLang.javascriptDefaults.addExtraLib(ENGINE_DEFS, 'ts:engine-defs.d.ts')
-  tsLang.javascriptDefaults.setCompilerOptions({
-    target: tsLang.ScriptTarget?.ES2022 ?? 99,
-    module: tsLang.ModuleKind?.ESNext ?? 99,
-    allowNonTsExtensions: true,
-    checkJs: true,
-  })
+  tsLang.javascriptDefaults.setCompilerOptions(compilerOpts)
 }
 
 export { monaco }
