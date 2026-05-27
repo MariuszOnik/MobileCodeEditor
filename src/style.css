@@ -1,0 +1,162 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0d0d1a;
+  --bg2:      #13132a;
+  --bg3:      #1a1a35;
+  --border:   #2a2a50;
+  --accent:   #00ffcc;
+  --accent2:  #7c3aed;
+  --text:     #e2e8f0;
+  --text-dim: #64748b;
+  --ok:       #22c55e;
+  --err:      #ef4444;
+  --info:     #60a5fa;
+  --toolbar:  48px;
+  --sidebar-w: 240px;
+}
+
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; }
+
+/* ── Layout ── */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+/* ── Toolbar ── */
+#toolbar {
+  height: var(--toolbar);
+  min-height: var(--toolbar);
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  z-index: 10;
+}
+
+.toolbar-filename {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 4px;
+}
+
+.tb-btn {
+  height: 36px;
+  min-width: 36px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--bg3);
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tb-btn:active { background: var(--border); }
+.tb-btn.run-btn  { background: #14532d; color: var(--ok); }
+.tb-btn.stop-btn { background: #450a0a; color: var(--err); }
+.tb-btn.active   { background: var(--accent2); color: #fff; }
+
+/* ── Main area ── */
+#main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Sidebar ── */
+#sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  z-index: 20;
+}
+#sidebar.open { transform: translateX(0); }
+#app.sidebar-open #sidebar { box-shadow: 4px 0 20px #0008; }
+
+/* ── File tree ── */
+.file-tree { padding: 8px 0; }
+.ft-header { display: flex; align-items: center; padding: 6px 12px; border-bottom: 1px solid var(--border); }
+.ft-title { flex: 1; font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-dim); letter-spacing: .08em; }
+.ft-btn-new { width: 26px; height: 26px; border: none; border-radius: 4px; background: var(--bg3); color: var(--accent); font-size: 18px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.ft-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; transition: background 0.1s; -webkit-tap-highlight-color: transparent; }
+.ft-item:active, .ft-item:hover { background: var(--bg3); }
+.ft-item.active { background: var(--bg3); border-left: 2px solid var(--accent); }
+.ft-icon { font-size: 14px; }
+.ft-name { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ft-del { width: 22px; height: 22px; border: none; border-radius: 3px; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 12px; opacity: 0; transition: opacity 0.1s; }
+.ft-item:hover .ft-del, .ft-item:active .ft-del { opacity: 1; }
+
+/* ── Panels ── */
+#editor-container, #run-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+#editor-container { width: 100%; }
+#run-container { background: #000; }
+
+/* ── Bottom tab bar ── */
+#tabbar {
+  height: var(--toolbar);
+  min-height: var(--toolbar);
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: stretch;
+}
+.tab-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 11px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  cursor: pointer;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-btn .tab-icon { font-size: 18px; }
+.tab-btn.active { color: var(--accent); }
+.tab-btn:active { background: var(--bg3); }
+
+/* ── Status bar ── */
+#status {
+  height: 22px;
+  min-height: 22px;
+  background: var(--bg2);
+  font-size: 11px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  border-top: 1px solid var(--border);
+}
+.status-ok    { color: var(--ok); }
+.status-error { color: var(--err); }
+.status-info  { color: var(--info); }
+
+/* ── Sidebar overlay backdrop (mobile) ── */
+#sidebar-backdrop {
+  display: none;
+  position: absolute; inset: 0;
+  background: #0008;
+  z-index: 19;
+}
+#app.sidebar-open #sidebar-backdrop { display: block; }

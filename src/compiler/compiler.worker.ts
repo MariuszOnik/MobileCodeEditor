@@ -1,0 +1,96 @@
+import * as esbuild from 'esbuild-wasm'
+
+let initialized = false
+
+async function init() {
+  if (initialized) return
+  await esbuild.initialize({ wasmURL: 'https://cdn.jsdelivr.net/npm/esbuild-wasm@0.28.0/esbuild.wasm' })
+  initialized = true
+}
+
+export interface CompileRequest {
+  id: string
+  files: Record<string, string>  // path → source
+  entryPoint: string             // e.g. "main.ts"
+}
+
+export interface CompileResult {
+  id: string
+  code?: string
+  errors?: string[]
+}
+
+self.onmessage = async (e: MessageEvent<CompileRequest>) => {
+  const { id, files, entryPoint } = e.data
+  try {
+    await init()
+
+    const result = await esbuild.build({
+      entryPoints: [entryPoint],
+      bundle: true,
+      write: false,
+      format: 'esm',
+      target: 'es2022',
+      plugins: [virtualFsPlugin(files)],
+    })
+
+    const code = result.outputFiles[0].text
+    const reply: CompileResult = { id, code }
+    self.postMessage(reply)
+  } catch (err: any) {
+    const errors = (err.errors ?? [{ text: String(err) }]).map((e: any) => e.text as string)
+    const reply: CompileResult = { id, errors }
+    self.postMessage(reply)
+  }
+}
+
+function virtualFsPlugin(files: Record<string, string>): esbuild.Plugin {
+  return {
+    name: 'virtual-fs',
+    setup(build) {
+      // Intercept local imports from virtual FS
+      build.onResolve({ filter: /^\./ }, args => {
+        const base = args.importer.replace(/[^/]+$/, '')
+        const path = resolvePath(base + args.path)
+        const resolved = findFile(files, path)
+        if (resolved) return { path: resolved, namespace: 'vfs' }
+        return null
+      })
+
+      build.onResolve({ filter: /^[^./]/ }, args => {
+        // External packages → esm.sh CDN
+        return { path: `https://esm.sh/${args.path}`, external: true }
+      })
+
+      build.onLoad({ filter: /.*/, namespace: 'vfs' }, args => {
+        const content = files[args.path]
+        const loader = args.path.endsWith('.ts') ? 'ts' : 'js'
+        return { contents: content, loader }
+      })
+
+      // Entry point
+      build.onResolve({ filter: /.*/ }, args => {
+        if (files[args.path]) return { path: args.path, namespace: 'vfs' }
+        return null
+      })
+    },
+  }
+}
+
+function resolvePath(path: string): string {
+  const parts = path.split('/')
+  const resolved: string[] = []
+  for (const p of parts) {
+    if (p === '..') resolved.pop()
+    else if (p !== '.') resolved.push(p)
+  }
+  return resolved.join('/')
+}
+
+function findFile(files: Record<string, string>, path: string): string | null {
+  if (files[path]) return path
+  for (const ext of ['.ts', '.js']) {
+    if (files[path + ext]) return path + ext
+  }
+  return null
+}
