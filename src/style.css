@@ -132,6 +132,10 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .ft-btn { border: none; background: transparent; cursor: pointer; color: var(--text-dim); display: flex; align-items: center; justify-content: center; }
 .ft-btn-new { width: 26px; height: 26px; border-radius: 4px; background: var(--bg3) !important; color: var(--accent) !important; font-size: 18px; line-height: 1; }
 .ft-btn-folder { height: 26px; padding: 0 6px; border-radius: 4px; background: var(--bg3) !important; color: var(--text-dim) !important; font-size: 11px; margin-right: 4px; }
+.ft-btn-upload { height: 26px; width: 26px; border-radius: 4px; background: var(--bg3) !important; color: #60a5fa !important; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.ft-upload-here { width: 22px; height: 22px; font-size: 12px; opacity: 0; transition: opacity 0.1s; }
+.ft-item:hover .ft-upload-here, .ft-item:active .ft-upload-here { opacity: 1; }
+@media (hover: none) { .ft-upload-here { opacity: 1; } }
 .ft-body { flex: 1; overflow-y: auto; }
 .ft-folder-header { cursor: pointer; }
 .ft-folder-header:hover { background: var(--bg3); }

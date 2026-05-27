@@ -44,9 +44,42 @@ export class FileTree {
     `
     header.querySelector('.ft-btn-new')!.addEventListener('click', () => this.createFile())
     header.querySelector('.ft-btn-folder')!.addEventListener('click', () => this.createFolder())
+    header.appendChild(this.makeUploadBtn())
     this.el.appendChild(header)
     this.el.insertAdjacentHTML('beforeend', '<div class="ft-body"></div>')
     this.refresh()
+  }
+
+  private makeUploadBtn(folder?: string): HTMLLabelElement {
+    const label = document.createElement('label')
+    label.className = 'ft-btn ft-btn-upload'
+    label.title = folder ? `Wgraj plik do „${folder}"` : 'Wgraj plik z urządzenia'
+    label.textContent = '📥'
+
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.multiple = true
+    input.accept = '.js,.ts,.html,.css,.json,.txt,.md,.xml,.csv,.ga'
+    input.style.display = 'none'
+
+    input.addEventListener('change', async () => {
+      const files = Array.from(input.files ?? [])
+      if (!files.length) return
+      let lastPath = ''
+      for (const file of files) {
+        const text = await file.text()
+        const path = folder ? `${folder}/${file.name}` : file.name
+        await writeFile(path, text)
+        emit(Events.FILE_CREATE, path)
+        lastPath = path
+      }
+      input.value = ''
+      await this.refresh()
+      if (lastPath) emit(Events.FILE_OPEN, lastPath)
+    })
+
+    label.appendChild(input)
+    return label
   }
 
   private renderTree(nodes: TreeNode[], depth = 0): void {
@@ -70,9 +103,15 @@ export class FileTree {
             <button class="ft-btn ft-del" title="Usuń folder">✕</button>
           </div>
         `
+        // inject upload button (label element, can't be in innerHTML)
+        const folderHeader = div.querySelector<HTMLElement>('.ft-folder-header')!
+        const uploadBtn = this.makeUploadBtn(node.path)
+        uploadBtn.classList.add('ft-upload-here')
+        folderHeader.querySelector('.ft-add-here')!.insertAdjacentElement('afterend', uploadBtn)
+
         div.querySelector('.ft-folder-header')!.addEventListener('click', (e) => {
           const t = e.target as HTMLElement
-          if (t.classList.contains('ft-del') || t.classList.contains('ft-add-here')) return
+          if (t.classList.contains('ft-del') || t.classList.contains('ft-add-here') || t.classList.contains('ft-btn-upload')) return
           this.collapsed.has(node.path)
             ? this.collapsed.delete(node.path)
             : this.collapsed.add(node.path)
