@@ -102,6 +102,8 @@ export function createEditor(
     language,
     theme: 'vs-dark',
     fontSize,
+    fontFamily: '"Roboto Mono", "Fira Mono", "Courier New", monospace',
+    fontLigatures: false,
     minimap: { enabled: false },
     glyphMargin: false,
     folding: false,

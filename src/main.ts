@@ -71,6 +71,9 @@ function applyFontSize(size: number): void {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
+  // Wait for web fonts to load so Monaco measures glyph widths correctly
+  await document.fonts.ready
+
   await ensureDefaultProject()
 
   fileTree = new FileTree(document.getElementById('file-tree')!)
