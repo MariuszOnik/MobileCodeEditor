@@ -23,7 +23,11 @@ export class ConsolePanel {
         <button class="console-clear" title="Wyczyść">🗑</button>
         <button class="console-close" title="Zamknij">✕</button>
       </div>
-      <div class="console-list"></div>
+      <div class="console-list">
+        <div class="console-row console-info console-build-banner">
+          <span class="console-msg" style="color:#4a5568;font-size:10px">Mobile Code Editor — logi z gry pojawią się tutaj</span>
+        </div>
+      </div>
     `
     this.listEl = this.el.querySelector('.console-list')!
     this.el.querySelector('.console-clear')!.addEventListener('click', () => this.clear())
@@ -47,7 +51,7 @@ export class ConsolePanel {
 
   clear(): void {
     this.entries = []
-    this.listEl.innerHTML = ''
+    this.listEl.innerHTML = '<div class="console-row console-info console-build-banner"><span class="console-msg" style="color:#4a5568;font-size:10px">Mobile Code Editor — logi z gry pojawią się tutaj</span></div>'
     this.updateCount()
   }
 

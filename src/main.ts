@@ -235,6 +235,8 @@ async function runProject() {
   const templateHtml = allFiles[htmlKey]
   if (templateHtml) {
     const html = inlineLocalScripts(templateHtml, allFiles, folder)
+    const buildInfo = buildInfoLine('HTML', htmlKey, html.length)
+    consolePanel?.log('info', buildInfo)
     setStatus('Uruchomiono ▶ (HTML)', 'ok')
     runCode({ html, container: runIframeEl})
     return
@@ -242,15 +244,37 @@ async function runProject() {
 
   // ESM mode: compile with esbuild
   const entry = currentPath ?? files[0]
+  const t0 = performance.now()
   const result = await compile(allFiles, entry)
   if (result.errors?.length) {
     setStatus('Błąd: ' + result.errors[0], 'error')
+    consolePanel?.log('error', '✖ Błąd kompilacji: ' + result.errors[0])
     switchPanel('editor')
     return
   }
 
+  const ms = Math.round(performance.now() - t0)
+  const buildInfo = buildInfoLine('ESM', entry, result.code!.length, ms)
+  consolePanel?.log('info', buildInfo)
   setStatus('Uruchomiono ▶', 'ok')
   runCode({ code: result.code!, container: runIframeEl})
+}
+
+const APP_VERSION = '0.3.0'
+
+function buildInfoLine(mode: string, entry: string, bytes: number, ms?: number): string {
+  const kb = (bytes / 1024).toFixed(1)
+  const now = new Date()
+  const time = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`
+  const parts = [
+    `▶ Build v${APP_VERSION}`,
+    `[${mode}]`,
+    entry,
+    `${kb} KB`,
+    ms !== undefined ? `${ms}ms` : '',
+    `@ ${time}`,
+  ].filter(Boolean)
+  return parts.join('  ')
 }
 
 function inlineLocalScripts(html: string, files: Record<string, string>, folder: string): string {
