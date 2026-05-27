@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0d0d1a">
+  <title>Mobile Code Editor</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
+  <script type="module" crossorigin src="/MobileCodeEditor/assets/index-ChLaV34-.js"></script>
+  <link rel="modulepreload" crossorigin href="/MobileCodeEditor/assets/rolldown-runtime-DK3Fl9T5.js">
+  <link rel="modulepreload" crossorigin href="/MobileCodeEditor/assets/monaco-XT-h7Muv.js">
+  <link rel="stylesheet" crossorigin href="/MobileCodeEditor/assets/monaco-Dj64A8-8.css">
+  <link rel="stylesheet" crossorigin href="/MobileCodeEditor/assets/index-Cow1ana_.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Top toolbar -->
+    <div id="toolbar">
+      <button class="tb-btn" id="btn-open-dir" title="Otwórz folder">📁</button>
+      <span class="toolbar-filename" id="current-filename">—</span>
+      <button class="tb-btn" id="btn-save" title="Zapisz (Ctrl+S)">💾</button>
+      <button class="tb-btn run-btn" id="btn-run" title="Uruchom">▶</button>
+      <button class="tb-btn stop-btn" id="btn-stop" title="Zatrzymaj">■</button>
+    </div>
+
+    <!-- Main content -->
+    <div id="main">
+      <!-- File sidebar -->
+      <div id="sidebar">
+        <div id="file-tree"></div>
+      </div>
+      <!-- Sidebar backdrop (tap to close on mobile) -->
+      <div id="sidebar-backdrop"></div>
+
+      <!-- Editor panel -->
+      <div id="editor-container"></div>
+
+      <!-- Run panel -->
+      <div id="run-container" style="display:none"></div>
+    </div>
+
+    <!-- Status bar -->
+    <div id="status" class="status status-info">Gotowy</div>
+
+    <!-- Bottom tab bar -->
+    <div id="tabbar">
+      <button class="tab-btn" id="tab-files">
+        <span class="tab-icon">📂</span>
+        <span>Pliki</span>
+      </button>
+      <button class="tab-btn active" id="tab-editor">
+        <span class="tab-icon">✏️</span>
+        <span>Edytor</span>
+      </button>
+      <button class="tab-btn" id="tab-run">
+        <span class="tab-icon">▶️</span>
+        <span>Podgląd</span>
+      </button>
+    </div>
+  </div>
+
+</body>
+</html>
