@@ -95,12 +95,13 @@ export function createEditor(
   container: HTMLElement,
   value: string,
   language: EditorLanguage = 'typescript',
+  fontSize = 14,
 ): monaco.editor.IStandaloneCodeEditor {
   return monaco.editor.create(container, {
     value,
     language,
     theme: 'vs-dark',
-    fontSize: 14,
+    fontSize,
     minimap: { enabled: false },
     lineNumbers: 'on',
     scrollBeyondLastLine: false,

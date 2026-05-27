@@ -58,6 +58,17 @@ let assetPanel: AssetPanel | null = null
 let consolePanel: ConsolePanel | null = null
 let sidebarOpen = false
 
+const FONT_MIN = 10
+const FONT_MAX = 28
+const FONT_STEP = 1
+let fontSize = parseInt(localStorage.getItem('mce-font-size') ?? '14', 10)
+
+function applyFontSize(size: number): void {
+  fontSize = Math.min(FONT_MAX, Math.max(FONT_MIN, size))
+  localStorage.setItem('mce-font-size', String(fontSize))
+  monacoEditor?.updateOptions({ fontSize })
+}
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
   await ensureDefaultProject()
@@ -106,6 +117,9 @@ async function init() {
   btnStop.addEventListener('click', () => { stopCode(runIframeEl); setStatus('Zatrzymano', 'info') })
   btnSave.addEventListener('click', saveCurrentFile)
   btnOpenDir.addEventListener('click', openNativeDir)
+
+  document.getElementById('btn-zoom-in')!.addEventListener('click',  () => applyFontSize(fontSize + FONT_STEP))
+  document.getElementById('btn-zoom-out')!.addEventListener('click', () => applyFontSize(fontSize - FONT_STEP))
 
   // Auto-save on Ctrl+S
   document.addEventListener('keydown', e => {
@@ -200,7 +214,7 @@ async function openFile(path: string) {
 
   const lang: EditorLanguage = getLanguage(path)
   if (!monacoEditor) {
-    monacoEditor = createEditor(editorEl, content, lang)
+    monacoEditor = createEditor(editorEl, content, lang, fontSize)
   } else {
     const uri = monaco.Uri.parse(`file:///${path}`)
     const existing = monaco.editor.getModel(uri)
