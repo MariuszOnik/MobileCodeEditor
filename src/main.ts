@@ -26,6 +26,14 @@ function compile(files: Record<string, string>, entryPoint: string): Promise<{ c
   })
 }
 
+// ── Build info bar ───────────────────────────────────────────────────────────
+;(function () {
+  const d = new Date(__BUILD_TIME__)
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  const label = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}  ${pad(d.getHours())}:${pad(d.getMinutes())}`
+  document.getElementById('app-build')!.textContent = `build  ${label}`
+})()
+
 // ── DOM refs ─────────────────────────────────────────────────────────────────
 const appEl       = document.getElementById('app')!
 const sidebarEl   = document.getElementById('sidebar')!

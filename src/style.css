@@ -27,6 +27,32 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
   overflow: hidden;
 }
 
+/* ── App title bar ── */
+#appbar {
+  height: 20px;
+  min-height: 20px;
+  background: #080812;
+  border-bottom: 1px solid #1a1a35;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 0;
+  user-select: none;
+}
+#app-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: .06em;
+  flex: 1;
+}
+#app-build {
+  font-size: 10px;
+  color: #3a3a60;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  letter-spacing: .04em;
+}
+
 /* ── Toolbar ── */
 #toolbar {
   height: var(--toolbar);

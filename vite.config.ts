@@ -6,6 +6,10 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['esbuild-wasm'],
   },
+  define: {
+    // Injected at build time — shows exact date+time of `npm run build`
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   build: {
     target: 'es2022',
     rollupOptions: {
