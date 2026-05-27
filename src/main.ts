@@ -218,10 +218,15 @@ async function openFile(path: string) {
   const lang: EditorLanguage = getLanguage(path)
   if (!monacoEditor) {
     monacoEditor = createEditor(editorEl, content, lang, fontSize)
+    // Override auto-detected tabSize — detectIndentation:true (Monaco default) may
+    // read the file and silently set tabSize:4 or :8, causing staircase indent on mobile.
+    monacoEditor.getModel()?.updateOptions({ tabSize: 2, indentSize: 2 })
   } else {
     const uri = monaco.Uri.parse(`file:///${path}`)
     const existing = monaco.editor.getModel(uri)
     const model = existing ?? monaco.editor.createModel(content, lang, uri)
+    // Force tabSize on every model regardless of what detectIndentation guessed
+    model.updateOptions({ tabSize: 2, indentSize: 2 })
     if (existing) monaco.editor.setModelLanguage(model, lang)
     monacoEditor.setModel(model)
   }
