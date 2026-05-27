@@ -8,11 +8,11 @@
   <meta name="theme-color" content="#0d0d1a">
   <title>Mobile Code Editor</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
-  <script type="module" crossorigin src="/MobileCodeEditor/assets/index-O5B2NY1Y.js"></script>
+  <script type="module" crossorigin src="/MobileCodeEditor/assets/index-CYksr-Gi.js"></script>
   <link rel="modulepreload" crossorigin href="/MobileCodeEditor/assets/rolldown-runtime-DK3Fl9T5.js">
   <link rel="modulepreload" crossorigin href="/MobileCodeEditor/assets/monaco-DKrxE9GP.js">
   <link rel="stylesheet" crossorigin href="/MobileCodeEditor/assets/monaco-Dj64A8-8.css">
-  <link rel="stylesheet" crossorigin href="/MobileCodeEditor/assets/index-UBmFTEPk.css">
+  <link rel="stylesheet" crossorigin href="/MobileCodeEditor/assets/index-CX1AXe_T.css">
 </head>
 <body>
   <div id="app">
@@ -28,11 +28,16 @@
 
     <!-- Main content -->
     <div id="main">
-      <!-- File sidebar -->
+      <!-- Sidebar -->
       <div id="sidebar">
+        <!-- Sidebar tab bar -->
+        <div id="sidebar-tabs">
+          <button class="stab active" id="stab-files">📂 Pliki</button>
+          <button class="stab" id="stab-assets">🖼 Zasoby</button>
+        </div>
         <div id="file-tree"></div>
+        <div id="asset-panel" style="display:none"></div>
       </div>
-      <!-- Sidebar backdrop (tap to close on mobile) -->
       <div id="sidebar-backdrop"></div>
 
       <!-- Editor panel -->
