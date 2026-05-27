@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: './',
+  base: '/MobileCodeEditor/',
   worker: { format: 'es' },
   optimizeDeps: {
     exclude: ['esbuild-wasm'],
@@ -10,8 +10,8 @@ export default defineConfig({
     target: 'es2022',
     rollupOptions: {
       output: {
-        manualChunks: {
-          monaco: ['monaco-editor'],
+        manualChunks(id: string) {
+          if (id.includes('monaco-editor')) return 'monaco'
         },
       },
     },
