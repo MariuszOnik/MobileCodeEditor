@@ -107,8 +107,10 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .ft-item.active { background: var(--bg3); border-left: 2px solid var(--accent); }
 .ft-icon { font-size: 14px; }
 .ft-name { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ft-del { width: 22px; height: 22px; border: none; border-radius: 3px; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 12px; opacity: 0; transition: opacity 0.1s; }
-.ft-item:hover .ft-del, .ft-item:active .ft-del { opacity: 1; }
+.ft-del, .ft-add-here { width: 22px; height: 22px; border: none; border-radius: 3px; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 13px; opacity: 0; transition: opacity 0.1s; }
+.ft-add-here { color: var(--accent); font-size: 16px; font-weight: bold; }
+.ft-item:hover .ft-del, .ft-item:active .ft-del,
+.ft-item:hover .ft-add-here, .ft-item:active .ft-add-here { opacity: 1; }
 
 /* ── Panels ── */
 #editor-container, #run-container {

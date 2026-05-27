@@ -65,15 +65,21 @@ export class FileTree {
           <div class="ft-item ft-folder-header" style="padding-left:${8 + depth * 14}px">
             <span class="ft-icon">${open ? '📂' : '📁'}</span>
             <span class="ft-name">${node.name}</span>
+            <button class="ft-btn ft-add-here" title="Nowy plik tutaj">+</button>
             <button class="ft-btn ft-del" title="Usuń folder">✕</button>
           </div>
         `
         div.querySelector('.ft-folder-header')!.addEventListener('click', (e) => {
-          if ((e.target as HTMLElement).classList.contains('ft-del')) return
+          const t = e.target as HTMLElement
+          if (t.classList.contains('ft-del') || t.classList.contains('ft-add-here')) return
           this.collapsed.has(node.path)
             ? this.collapsed.delete(node.path)
             : this.collapsed.add(node.path)
           this.refresh()
+        })
+        div.querySelector('.ft-add-here')!.addEventListener('click', (e) => {
+          e.stopPropagation()
+          this.createFile(node.path)
         })
         div.querySelector('.ft-del')!.addEventListener('click', async (e) => {
           e.stopPropagation()
@@ -90,7 +96,7 @@ export class FileTree {
         }
       } else {
         const ext = node.name.split('.').pop() ?? ''
-        const icon = ext === 'ts' ? '📄' : ext === 'js' ? '📜' : ext === 'json' ? '📋' : '📝'
+        const icon = ext === 'ts' ? '📄' : ext === 'js' ? '📜' : ext === 'html' || ext === 'htm' ? '🌐' : ext === 'json' ? '📋' : ext === 'css' ? '🎨' : '📝'
         const item = document.createElement('div')
         item.className = 'ft-item' + (node.path === this.activeFile ? ' active' : '')
         item.setAttribute('data-path', node.path)
@@ -113,11 +119,11 @@ export class FileTree {
     }
   }
 
-  private async createFile(defaultFolder?: string): Promise<void> {
-    const hint = defaultFolder ? `${defaultFolder}/nazwa.ts` : 'np. main.ts lub Gra1/player.ts'
-    const name = prompt(`Ścieżka pliku (${hint}):`, defaultFolder ? `${defaultFolder}/` : '')
+  private async createFile(folder?: string): Promise<void> {
+    const label = folder ? `Nazwa pliku w "${folder}":` : 'Nazwa pliku (np. main.ts):'
+    const name = prompt(label, '')
     if (!name?.trim()) return
-    const path = name.trim()
+    const path = folder ? `${folder}/${name.trim()}` : name.trim()
     const ext = path.split('.').pop()
     const starter = ext === 'ts'
       ? `// ${path}\n`

@@ -1,10 +1,16 @@
 import * as monaco from 'monaco-editor'
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
+import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
+import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
+import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
 
 self.MonacoEnvironment = {
   getWorker(_: unknown, label: string) {
     if (label === 'typescript' || label === 'javascript') return new tsWorker()
+    if (label === 'html' || label === 'handlebars') return new htmlWorker()
+    if (label === 'css' || label === 'scss' || label === 'less') return new cssWorker()
+    if (label === 'json') return new jsonWorker()
     return new editorWorker()
   },
 }
@@ -83,10 +89,12 @@ if (tsLang?.typescriptDefaults) {
 
 export { monaco }
 
+export type EditorLanguage = 'typescript' | 'javascript' | 'html' | 'css' | 'json'
+
 export function createEditor(
   container: HTMLElement,
   value: string,
-  language: 'typescript' | 'javascript' = 'typescript',
+  language: EditorLanguage = 'typescript',
 ): monaco.editor.IStandaloneCodeEditor {
   return monaco.editor.create(container, {
     value,
@@ -106,6 +114,10 @@ export function createEditor(
   })
 }
 
-export function getLanguage(path: string): 'typescript' | 'javascript' {
-  return path.endsWith('.ts') ? 'typescript' : 'javascript'
+export function getLanguage(path: string): EditorLanguage {
+  if (path.endsWith('.ts')) return 'typescript'
+  if (path.endsWith('.html') || path.endsWith('.htm')) return 'html'
+  if (path.endsWith('.css')) return 'css'
+  if (path.endsWith('.json')) return 'json'
+  return 'javascript'
 }

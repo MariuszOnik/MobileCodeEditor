@@ -1,5 +1,5 @@
 import './style.css'
-import { createEditor, getLanguage, monaco } from './editor/monaco-setup'
+import { createEditor, getLanguage, monaco, type EditorLanguage } from './editor/monaco-setup'
 import { readFile, writeFile, listFiles } from './fs/virtual-fs'
 import { FileTree } from './ui/file-tree'
 import { runCode, stopCode } from './runtime/runner'
@@ -162,11 +162,14 @@ async function openFile(path: string) {
   filenameEl.textContent = path
   fileTree?.setActive(path)
 
-  const lang = getLanguage(path)
+  const lang: EditorLanguage = getLanguage(path)
   if (!monacoEditor) {
     monacoEditor = createEditor(editorEl, content, lang)
   } else {
-    const model = monaco.editor.createModel(content, lang, monaco.Uri.parse(`file:///${path}`))
+    const uri = monaco.Uri.parse(`file:///${path}`)
+    const existing = monaco.editor.getModel(uri)
+    const model = existing ?? monaco.editor.createModel(content, lang, uri)
+    if (existing) monaco.editor.setModelLanguage(model, lang)
     monacoEditor.setModel(model)
   }
 
