@@ -268,3 +268,44 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
   z-index: 19;
 }
 #app.sidebar-open #sidebar-backdrop { display: block; }
+
+/* ── Mini dialogs (replaces confirm/prompt blocked in iOS PWA) ── */
+.mini-overlay {
+  position: fixed; inset: 0;
+  background: #0009;
+  z-index: 3000;
+  display: flex; align-items: center; justify-content: center;
+}
+.mini-dialog {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 16px 14px;
+  width: min(320px, 90vw);
+  display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 8px 40px #000c;
+}
+.mini-msg { font-size: 13px; color: var(--text); line-height: 1.5; }
+.mini-input {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 9px 11px;
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+  width: 100%;
+}
+.mini-input:focus { border-color: var(--accent); }
+.mini-btns { display: flex; gap: 8px; justify-content: flex-end; }
+.mini-btn {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mini-cancel { background: var(--bg3); color: var(--text-dim); }
+.mini-ok     { background: var(--accent2); color: #fff; }
+.mini-ok-danger { background: #7f1d1d; color: #fca5a5; }

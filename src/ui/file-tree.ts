@@ -4,7 +4,7 @@ import { emit, Events } from './events'
 interface TreeNode {
   type: 'file' | 'folder'
   name: string
-  path: string          // full path for files, prefix for folders
+  path: string
   children?: TreeNode[]
 }
 
@@ -83,12 +83,17 @@ export class FileTree {
         })
         div.querySelector('.ft-del')!.addEventListener('click', async (e) => {
           e.stopPropagation()
-          if (!confirm(`Usuń folder ${node.name} i wszystkie pliki?`)) return
-          for (const child of node.children ?? []) {
-            if (child.type === 'file') await deleteFile(child.path)
+          const ok = await miniConfirm(`Usuń folder „${node.name}" i wszystkie pliki?`)
+          if (!ok) return
+          // Delete ALL files with this prefix (including .gitkeep)
+          const all = await listFiles()
+          for (const f of all) {
+            if (f === node.path || f.startsWith(node.path + '/')) {
+              await deleteFile(f)
+            }
           }
           emit(Events.FILE_DELETE, node.path)
-          this.refresh()
+          await this.refresh()
         })
         parent.appendChild(div)
         if (open && node.children?.length) {
@@ -109,10 +114,11 @@ export class FileTree {
         item.querySelector('.ft-name')!.addEventListener('click', () => emit(Events.FILE_OPEN, node.path))
         item.querySelector('.ft-del')!.addEventListener('click', async (e) => {
           e.stopPropagation()
-          if (!confirm(`Usuń ${node.path}?`)) return
+          const ok = await miniConfirm(`Usuń plik „${node.path}"?`)
+          if (!ok) return
           await deleteFile(node.path)
           emit(Events.FILE_DELETE, node.path)
-          this.refresh()
+          await this.refresh()
         })
         parent.appendChild(item)
       }
@@ -120,26 +126,20 @@ export class FileTree {
   }
 
   private async createFile(folder?: string): Promise<void> {
-    const label = folder ? `Nazwa pliku w "${folder}":` : 'Nazwa pliku (np. main.ts):'
-    const name = prompt(label, '')
+    const label = folder ? `Nowy plik w „${folder}":` : 'Nowy plik (np. main.ts):'
+    const name = await miniPrompt(label, '')
     if (!name?.trim()) return
     const path = folder ? `${folder}/${name.trim()}` : name.trim()
-    const ext = path.split('.').pop()
-    const starter = ext === 'ts'
-      ? `// ${path}\n`
-      : `// ${path}\n`
-    await writeFile(path, starter)
+    await writeFile(path, `// ${path}\n`)
     emit(Events.FILE_CREATE, path)
     await this.refresh()
     emit(Events.FILE_OPEN, path)
   }
 
   private async createFolder(): Promise<void> {
-    const name = prompt('Nazwa folderu (np. Gra1 lub Gra1/library):')
+    const name = await miniPrompt('Nazwa folderu (np. Gra1):')
     if (!name?.trim()) return
-    // Create a placeholder .gitkeep so folder appears in tree
-    const keepPath = `${name.trim()}/.gitkeep`
-    await writeFile(keepPath, '')
+    await writeFile(`${name.trim()}/.gitkeep`, '')
     await this.refresh()
   }
 
@@ -152,6 +152,58 @@ export class FileTree {
   }
 }
 
+// ── Custom dialogs (replaces confirm/prompt which are blocked in iOS PWA) ──────
+
+function miniConfirm(msg: string): Promise<boolean> {
+  return new Promise(resolve => {
+    const overlay = createOverlay()
+    overlay.innerHTML = `
+      <div class="mini-dialog">
+        <div class="mini-msg">${msg}</div>
+        <div class="mini-btns">
+          <button class="mini-btn mini-cancel">Anuluj</button>
+          <button class="mini-btn mini-ok mini-ok-danger">Usuń</button>
+        </div>
+      </div>
+    `
+    overlay.querySelector('.mini-cancel')!.addEventListener('click', () => { overlay.remove(); resolve(false) })
+    overlay.querySelector('.mini-ok')!.addEventListener('click',     () => { overlay.remove(); resolve(true)  })
+    document.body.appendChild(overlay)
+  })
+}
+
+function miniPrompt(label: string, defaultValue = ''): Promise<string | null> {
+  return new Promise(resolve => {
+    const overlay = createOverlay()
+    overlay.innerHTML = `
+      <div class="mini-dialog">
+        <div class="mini-msg">${label}</div>
+        <input class="mini-input" type="text" value="${defaultValue}" autocomplete="off" autocorrect="off" spellcheck="false">
+        <div class="mini-btns">
+          <button class="mini-btn mini-cancel">Anuluj</button>
+          <button class="mini-btn mini-ok">OK</button>
+        </div>
+      </div>
+    `
+    const input = overlay.querySelector<HTMLInputElement>('.mini-input')!
+    const done = (val: string | null) => { overlay.remove(); resolve(val) }
+    overlay.querySelector('.mini-cancel')!.addEventListener('click', () => done(null))
+    overlay.querySelector('.mini-ok')!.addEventListener('click',     () => done(input.value.trim() || null))
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter')  done(input.value.trim() || null)
+      if (e.key === 'Escape') done(null)
+    })
+    document.body.appendChild(overlay)
+    requestAnimationFrame(() => { input.focus(); input.select() })
+  })
+}
+
+function createOverlay(): HTMLElement {
+  const el = document.createElement('div')
+  el.className = 'mini-overlay'
+  return el
+}
+
 function buildTree(paths: string[]): TreeNode[] {
   const root: TreeNode[] = []
   const folderMap = new Map<string, TreeNode>()
@@ -161,7 +213,6 @@ function buildTree(paths: string[]): TreeNode[] {
     if (parts.length === 1) {
       root.push({ type: 'file', name: path, path })
     } else {
-      // Build folder nodes
       let current = root
       for (let i = 0; i < parts.length - 1; i++) {
         const folderPath = parts.slice(0, i + 1).join('/')
