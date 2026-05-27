@@ -58,6 +58,8 @@ function virtualFsPlugin(files: Record<string, string>): esbuild.Plugin {
       })
 
       build.onResolve({ filter: /^[^./]/ }, args => {
+        // If it exists in VFS, don't mark as external (handles entry point like "main.ts")
+        if (findFile(files, args.path)) return null
         // External packages → esm.sh CDN
         return { path: `https://esm.sh/${args.path}`, external: true }
       })

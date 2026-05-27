@@ -76,7 +76,21 @@ async function init() {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveCurrentFile() }
   })
 
+  // Mobile keyboard: shrink app to visible viewport so editor stays above keyboard
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', onViewportResize)
+    window.visualViewport.addEventListener('scroll', onViewportResize)
+  }
+
   switchPanel('editor')
+}
+
+function onViewportResize() {
+  const vv = window.visualViewport!
+  const app = document.getElementById('app')!
+  app.style.height = `${vv.height}px`
+  app.style.transform = `translateY(${vv.offsetTop}px)`
+  requestAnimationFrame(() => monacoEditor?.layout())
 }
 
 async function ensureDefaultProject() {
