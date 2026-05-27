@@ -3,8 +3,27 @@ declare module 'phaser' {
   export = Phaser;
 }
 declare namespace Phaser {
-  class Game { constructor(config: any); destroy(removeCanvas: boolean): void; }
+  class Game { constructor(config: Types.Core.GameConfig | any); destroy(removeCanvas: boolean): void; }
   class Scene { add: GameObjects.GameObjectFactory; physics: Physics.Arcade.ArcadePhysics; input: Input.InputPlugin; cameras: Cameras.Scene2D.CameraManager; time: Time.Clock; load: Loader.LoaderPlugin; create(): void; update(): void; preload(): void; }
+  namespace Types {
+    namespace Core {
+      interface GameConfig {
+        type?: number;
+        width?: number | string;
+        height?: number | string;
+        backgroundColor?: string | number;
+        scene?: any;
+        physics?: { default?: string; arcade?: { gravity?: { x?: number; y?: number }; debug?: boolean } };
+        scale?: { mode?: number; autoCenter?: number; width?: number | string; height?: number | string };
+        parent?: string | HTMLElement;
+        audio?: any;
+        fps?: any;
+        render?: any;
+        input?: any;
+        banner?: any;
+      }
+    }
+  }
   namespace GameObjects {
     interface GameObjectFactory {
       image(x: number, y: number, key: string): Image;
@@ -62,7 +81,7 @@ ${e}
 </body>
 </html>`,t.appendChild(n),I=n}function L(e){I&&=(I.remove(),null),e.querySelectorAll(`iframe`).forEach(e=>e.remove())}function Ce(e){return new Worker(`/MobileCodeEditor/assets/compiler.worker-ztWf7a8w.js`,{type:`module`,name:e?.name})}var R=new Ce,z=new Map;R.onmessage=e=>{let{id:t,code:n,errors:r}=e.data;z.get(t)?.({code:n,errors:r}),z.delete(t)};function we(e,t){return new Promise(n=>{let r=Math.random().toString(36).slice(2);z.set(r,n),R.postMessage({id:r,files:e,entryPoint:t})})}var Te=document.getElementById(`app`),Ee=document.getElementById(`sidebar`),B=document.getElementById(`editor-container`),V=document.getElementById(`run-container`),H=document.getElementById(`status`),U=document.getElementById(`tab-editor`),W=document.getElementById(`tab-run`),G=document.getElementById(`tab-files`),De=document.getElementById(`btn-run`),Oe=document.getElementById(`btn-stop`),ke=document.getElementById(`btn-save`),Ae=document.getElementById(`btn-open-dir`),je=document.getElementById(`current-filename`),K=null,q=null,J=null,Y=!1;async function Me(){await Ne(),J=new be(document.getElementById(`file-tree`)),await J.refresh();let e=await k();e.length&&X(e[0]),N(F.FILE_OPEN,e=>X(e)),N(F.FILE_CREATE,()=>J?.refresh()),N(F.FILE_DELETE,e=>{q===e&&(q=null)}),U.addEventListener(`click`,()=>Q(`editor`)),W.addEventListener(`click`,()=>Q(`run`)),G.addEventListener(`click`,()=>Fe()),De.addEventListener(`click`,Pe),Oe.addEventListener(`click`,()=>{L(V),$(`Zatrzymano`,`info`)}),ke.addEventListener(`click`,Z),Ae.addEventListener(`click`,Ie),document.addEventListener(`keydown`,e=>{(e.ctrlKey||e.metaKey)&&e.key===`s`&&(e.preventDefault(),Z())}),Q(`editor`)}async function Ne(){(await k()).length>0||await D(`main.ts`,`import Phaser from 'phaser'
 
-const config: Phaser.Types.Core.GameConfig = {
+new Phaser.Game({
   type: Phaser.AUTO,
   width: window.innerWidth,
   height: window.innerHeight,
@@ -70,14 +89,12 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: {
     create(this: Phaser.Scene) {
       this.add.text(
-        Number(config.width) / 2,
-        Number(config.height) / 2,
+        window.innerWidth / 2,
+        window.innerHeight / 2,
         'Hello Mobile IDE!\\n\\nEdytuj main.ts i kliknij ▶',
         { fontSize: '24px', color: '#00ffcc', align: 'center' }
       ).setOrigin(0.5)
     }
   }
-}
-
-new Phaser.Game(config)
+})
 `)}async function X(e){q&&K&&await Z();let r=await E(e);if(r===null)return;q=e,je.textContent=e,J?.setActive(e);let i=te(e);if(!K)K=ee(B,r,i);else{let a=t.createModel(r,i,n.parse(`file:///${e}`));K.setModel(a)}Q(`editor`)}async function Z(){if(!q||!K)return;let e=K.getValue();await D(q,e),$(`Zapisano: ${q}`,`ok`)}async function Pe(){await Z(),$(`Kompilowanie…`,`info`),Q(`run`);let e=await k(),t={};for(let n of e){let e=await E(n);e!==null&&(t[n]=e)}let n=await we(t,q??e[0]);if(n.errors?.length){$(`Błąd: `+n.errors[0],`error`),Q(`editor`);return}$(`Uruchomiono ▶`,`ok`),Se({code:n.code,container:V})}function Q(e){B.style.display=e===`editor`?`flex`:`none`,V.style.display=e===`run`?`flex`:`none`,U.classList.toggle(`active`,e===`editor`),W.classList.toggle(`active`,e===`run`),e===`editor`&&requestAnimationFrame(()=>K?.layout())}function Fe(){Y=!Y,Ee.classList.toggle(`open`,Y),G.classList.toggle(`active`,Y),Te.classList.toggle(`sidebar-open`,Y)}function $(e,t){H.textContent=e,H.className=`status status-${t}`}async function Ie(){try{let{openNativeFolder:e}=await a(async()=>{let{openNativeFolder:e}=await Promise.resolve().then(()=>ge);return{openNativeFolder:e}},void 0);await e(),await J?.refresh(),$(`Folder otwarty`,`ok`)}catch(e){$(e.message??`Błąd`,`error`)}}Me();
