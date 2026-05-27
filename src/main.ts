@@ -107,6 +107,8 @@ async function init() {
   on(Events.FILE_OPEN, (path: string) => openFile(path))
   on(Events.FILE_CREATE, () => { fileTree?.refresh(); assetPanel?.refresh() })
   on(Events.FILE_DELETE, (path: string) => {
+    // Dispose cached Monaco model so re-creating the same filename starts fresh
+    monaco.editor.getModel(monaco.Uri.parse(`file:///${path}`))?.dispose()
     if (currentPath === path) currentPath = null
     fileTree?.refresh()
     assetPanel?.refresh()
@@ -214,8 +216,10 @@ async function openFile(path: string) {
     await saveCurrentFile()
   }
 
-  const content = await readFile(path)
-  if (content === null) return
+  const raw = await readFile(path)
+  if (raw === null) return
+  // Expand tabs → 2 spaces so Monaco never mis-renders tab-stop widths
+  const content = raw.replace(/\t/g, '  ')
 
   currentPath = path
   filenameEl.textContent = path
@@ -231,9 +235,12 @@ async function openFile(path: string) {
     const uri = monaco.Uri.parse(`file:///${path}`)
     const existing = monaco.editor.getModel(uri)
     const model = existing ?? monaco.editor.createModel(content, lang, uri)
-    // Force tabSize on every model regardless of what detectIndentation guessed
+    // Always sync content (tabs may have been expanded differently)
+    if (existing) {
+      model.setValue(content)
+      monaco.editor.setModelLanguage(model, lang)
+    }
     model.updateOptions({ tabSize: 2, indentSize: 2 })
-    if (existing) monaco.editor.setModelLanguage(model, lang)
     monacoEditor.setModel(model)
   }
 
