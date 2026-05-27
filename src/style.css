@@ -118,6 +118,11 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .ft-item:hover .ft-del, .ft-item:active .ft-del,
 .ft-item:hover .ft-add-here, .ft-item:active .ft-add-here { opacity: 1; }
 
+/* on touch screens there is no hover — always show action buttons */
+@media (hover: none) {
+  .ft-del, .ft-add-here { opacity: 1; }
+}
+
 /* ── Asset panel ── */
 .asset-panel { padding: 4px; }
 .asset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; padding: 8px; }
