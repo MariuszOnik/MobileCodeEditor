@@ -9,6 +9,7 @@ export interface LogEntry {
 export class ConsolePanel {
   private el: HTMLElement
   private listEl: HTMLElement
+  private buildInfoEl: HTMLElement
   private entries: LogEntry[] = []
   private visible = false
   private maxEntries = 200
@@ -23,6 +24,7 @@ export class ConsolePanel {
         <button class="console-clear" title="Wyczyść">🗑</button>
         <button class="console-close" title="Zamknij">✕</button>
       </div>
+      <div class="console-build-info"></div>
       <div class="console-list">
         <div class="console-row console-info console-build-banner">
           <span class="console-msg" style="color:#4a5568;font-size:10px">Mobile Code Editor — logi z gry pojawią się tutaj</span>
@@ -30,9 +32,15 @@ export class ConsolePanel {
       </div>
     `
     this.listEl = this.el.querySelector('.console-list')!
+    this.buildInfoEl = this.el.querySelector('.console-build-info')!
     this.el.querySelector('.console-clear')!.addEventListener('click', () => this.clear())
     this.el.querySelector('.console-close')!.addEventListener('click', () => this.hide())
     this.el.style.display = 'none'
+  }
+
+  setBuildInfo(info: string): void {
+    this.buildInfoEl.textContent = info
+    this.buildInfoEl.style.display = info ? '' : 'none'
   }
 
   log(level: LogLevel, msg: string): void {

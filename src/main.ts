@@ -236,7 +236,7 @@ async function runProject() {
   if (templateHtml) {
     const html = inlineLocalScripts(templateHtml, allFiles, folder)
     const buildInfo = buildInfoLine('HTML', htmlKey, html.length)
-    consolePanel?.log('info', buildInfo)
+    consolePanel?.setBuildInfo(buildInfo)
     setStatus('Uruchomiono ▶ (HTML)', 'ok')
     runCode({ html, container: runIframeEl})
     return
@@ -255,7 +255,7 @@ async function runProject() {
 
   const ms = Math.round(performance.now() - t0)
   const buildInfo = buildInfoLine('ESM', entry, result.code!.length, ms)
-  consolePanel?.log('info', buildInfo)
+  consolePanel?.setBuildInfo(buildInfo)
   setStatus('Uruchomiono ▶', 'ok')
   runCode({ code: result.code!, container: runIframeEl})
 }
