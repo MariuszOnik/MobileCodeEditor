@@ -8,11 +8,11 @@
   <meta name="theme-color" content="#0d0d1a">
   <title>Mobile Code Editor</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
-  <script type="module" crossorigin src="/MobileCodeEditor/assets/index-CYksr-Gi.js"></script>
+  <script type="module" crossorigin src="/MobileCodeEditor/assets/index-C4X_z-q8.js"></script>
   <link rel="modulepreload" crossorigin href="/MobileCodeEditor/assets/rolldown-runtime-DK3Fl9T5.js">
   <link rel="modulepreload" crossorigin href="/MobileCodeEditor/assets/monaco-DKrxE9GP.js">
   <link rel="stylesheet" crossorigin href="/MobileCodeEditor/assets/monaco-Dj64A8-8.css">
-  <link rel="stylesheet" crossorigin href="/MobileCodeEditor/assets/index-CX1AXe_T.css">
+  <link rel="stylesheet" crossorigin href="/MobileCodeEditor/assets/index-cJMXmj08.css">
 </head>
 <body>
   <div id="app">
@@ -24,13 +24,13 @@
       <button class="tb-btn" id="btn-save" title="Zapisz (Ctrl+S)">💾</button>
       <button class="tb-btn run-btn" id="btn-run" title="Uruchom">▶</button>
       <button class="tb-btn stop-btn" id="btn-stop" title="Zatrzymaj">■</button>
+      <button class="tb-btn" id="btn-console" title="Konsola">🖥</button>
     </div>
 
     <!-- Main content -->
     <div id="main">
       <!-- Sidebar -->
       <div id="sidebar">
-        <!-- Sidebar tab bar -->
         <div id="sidebar-tabs">
           <button class="stab active" id="stab-files">📂 Pliki</button>
           <button class="stab" id="stab-assets">🖼 Zasoby</button>
@@ -43,8 +43,11 @@
       <!-- Editor panel -->
       <div id="editor-container"></div>
 
-      <!-- Run panel -->
-      <div id="run-container" style="display:none"></div>
+      <!-- Run panel: iframe + console stacked vertically -->
+      <div id="run-container" style="display:none">
+        <div id="run-iframe-area"></div>
+        <div id="console-panel"></div>
+      </div>
     </div>
 
     <!-- Status bar -->
