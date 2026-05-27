@@ -119,8 +119,6 @@ export function createEditor(
     overviewRulerLanes: 0,
     padding: { top: 8 },
     renderLineHighlight: 'line',
-    // hide indent guide lines
-    renderIndentGuides: false,
     guides: {
       indentation: false,
       bracketPairs: false,
