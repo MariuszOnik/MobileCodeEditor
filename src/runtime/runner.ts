@@ -10,12 +10,16 @@ let currentFrame: HTMLIFrameElement | null = null
 const CONSOLE_INTERCEPTOR = `<script>
 (function(){
   var orig = { log: console.log, warn: console.warn, error: console.error, info: console.info };
+  function fmtArg(a) {
+    if (a instanceof Error) {
+      // stack already contains message + file + line info
+      return a.stack || a.message;
+    }
+    try { return typeof a === 'object' && a !== null ? JSON.stringify(a, null, 2) : String(a); }
+    catch(e) { return String(a); }
+  }
   function send(level, args) {
-    var msg = Array.from(args).map(function(a) {
-      if (a instanceof Error) return a.message + (a.stack ? '\\n' + a.stack : '');
-      try { return typeof a === 'object' && a !== null ? JSON.stringify(a, null, 2) : String(a); }
-      catch(e) { return String(a); }
-    }).join(' ');
+    var msg = Array.from(args).map(fmtArg).join(' ');
     try { window.parent.postMessage({ __mce__: true, level: level, msg: msg }, '*'); } catch(e){}
     orig[level].apply(console, args);
   }
@@ -24,10 +28,15 @@ const CONSOLE_INTERCEPTOR = `<script>
   console.error = function(){ send('error', arguments); };
   console.info  = function(){ send('info',  arguments); };
   window.addEventListener('error', function(e) {
-    send('error', [e.message + (e.lineno ? ' (linia ' + e.lineno + ')' : '')]);
+    // e.filename is the script URL; strip to basename only
+    var file = e.filename ? e.filename.replace(/^.*\\//, '').replace(/^about:.*/, '') : '';
+    var loc  = (file ? '[' + file + '] ' : '') +
+               (e.lineno ? 'linia ' + e.lineno + (e.colno ? ':' + e.colno : '') : '');
+    send('error', [e.message + (loc ? '  —  ' + loc : '')]);
   });
   window.addEventListener('unhandledrejection', function(e) {
-    send('error', ['Promise nieobsłużony: ' + (e.reason?.message ?? e.reason)]);
+    var r = e.reason;
+    send('error', [r instanceof Error ? (r.stack || r.message) : ('Promise odrzucony: ' + String(r))]);
   });
 })();
 </script>`
