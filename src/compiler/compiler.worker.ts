@@ -66,6 +66,10 @@ function virtualFsPlugin(files: Record<string, string>): esbuild.Plugin {
 
       build.onLoad({ filter: /.*/, namespace: 'vfs' }, args => {
         const content = files[args.path]
+        // Binary assets (images, audio) stored as data URLs → export as string
+        if (isAssetPath(args.path)) {
+          return { contents: `export default ${JSON.stringify(content)}`, loader: 'js' }
+        }
         const loader = args.path.endsWith('.ts') ? 'ts' : 'js'
         return { contents: content, loader }
       })
@@ -77,6 +81,11 @@ function virtualFsPlugin(files: Record<string, string>): esbuild.Plugin {
       })
     },
   }
+}
+
+const ASSET_EXTS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'mp3', 'ogg', 'wav']
+function isAssetPath(path: string): boolean {
+  return ASSET_EXTS.includes(path.split('.').pop()?.toLowerCase() ?? '')
 }
 
 function resolvePath(path: string): string {

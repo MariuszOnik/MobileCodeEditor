@@ -23,11 +23,16 @@
 
     <!-- Main content -->
     <div id="main">
-      <!-- File sidebar -->
+      <!-- Sidebar -->
       <div id="sidebar">
+        <!-- Sidebar tab bar -->
+        <div id="sidebar-tabs">
+          <button class="stab active" id="stab-files">📂 Pliki</button>
+          <button class="stab" id="stab-assets">🖼 Zasoby</button>
+        </div>
         <div id="file-tree"></div>
+        <div id="asset-panel" style="display:none"></div>
       </div>
-      <!-- Sidebar backdrop (tap to close on mobile) -->
       <div id="sidebar-backdrop"></div>
 
       <!-- Editor panel -->

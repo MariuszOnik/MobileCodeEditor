@@ -2,6 +2,7 @@ import './style.css'
 import { createEditor, getLanguage, monaco, type EditorLanguage } from './editor/monaco-setup'
 import { readFile, writeFile, listFiles } from './fs/virtual-fs'
 import { FileTree } from './ui/file-tree'
+import { AssetPanel } from './ui/asset-panel'
 import { runCode, stopCode } from './runtime/runner'
 import { on, Events } from './ui/events'
 import CompilerWorker from './compiler/compiler.worker?worker'
@@ -43,6 +44,7 @@ const filenameEl  = document.getElementById('current-filename')!
 let monacoEditor: ReturnType<typeof createEditor> | null = null
 let currentPath: string | null = null
 let fileTree: FileTree | null = null
+let assetPanel: AssetPanel | null = null
 let sidebarOpen = false
 
 // ── Init ─────────────────────────────────────────────────────────────────────
@@ -52,14 +54,25 @@ async function init() {
   fileTree = new FileTree(document.getElementById('file-tree')!)
   await fileTree.refresh()
 
+  assetPanel = new AssetPanel(document.getElementById('asset-panel')!)
+
+  // Sidebar tabs: Pliki / Zasoby
+  document.getElementById('stab-files')!.addEventListener('click', () => switchSidebarTab('files'))
+  document.getElementById('stab-assets')!.addEventListener('click', () => switchSidebarTab('assets'))
+  document.getElementById('sidebar-backdrop')!.addEventListener('click', () => toggleSidebar())
+
   // Open first file
   const files = await listFiles()
   if (files.length) openFile(files[0])
 
   // Events
   on(Events.FILE_OPEN, (path: string) => openFile(path))
-  on(Events.FILE_CREATE, () => fileTree?.refresh())
-  on(Events.FILE_DELETE, (path: string) => { if (currentPath === path) currentPath = null })
+  on(Events.FILE_CREATE, () => { fileTree?.refresh(); assetPanel?.refresh() })
+  on(Events.FILE_DELETE, (path: string) => {
+    if (currentPath === path) currentPath = null
+    fileTree?.refresh()
+    assetPanel?.refresh()
+  })
 
   // Tab buttons
   tabEditor.addEventListener('click', () => switchPanel('editor'))
@@ -250,6 +263,17 @@ function toggleSidebar() {
   sidebarEl.classList.toggle('open', sidebarOpen)
   tabFiles.classList.toggle('active', sidebarOpen)
   appEl.classList.toggle('sidebar-open', sidebarOpen)
+}
+
+function switchSidebarTab(tab: 'files' | 'assets') {
+  document.getElementById('file-tree')!.style.display   = tab === 'files'  ? '' : 'none'
+  document.getElementById('asset-panel')!.style.display = tab === 'assets' ? '' : 'none'
+  document.getElementById('stab-files')!.classList.toggle('active', tab === 'files')
+  document.getElementById('stab-assets')!.classList.toggle('active', tab === 'assets')
+  if (tab === 'assets') {
+    const folder = currentPath?.includes('/') ? currentPath.split('/').slice(0, -1).join('/') : ''
+    assetPanel?.setFolder(folder)
+  }
 }
 
 function setStatus(msg: string, type: 'ok' | 'error' | 'info') {
