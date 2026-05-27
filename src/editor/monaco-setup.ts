@@ -104,19 +104,28 @@ export function createEditor(
     fontSize,
     minimap: { enabled: false },
     lineNumbers: 'on',
+    lineNumbersMinChars: 3,
+    lineDecorationsWidth: 0,
     scrollBeyondLastLine: false,
+    scrollBeyondLastColumn: 5,
     automaticLayout: true,
     tabSize: 2,
     wordWrap: 'off',
-    scrollBeyondLastColumn: 8,
     scrollbar: {
       horizontal: 'auto',
       vertical: 'auto',
       useShadows: false,
     },
+    overviewRulerLanes: 0,
     padding: { top: 8 },
-    lineDecorationsWidth: 8,
     renderLineHighlight: 'line',
+    // hide indent guide lines
+    renderIndentGuides: false,
+    guides: {
+      indentation: false,
+      bracketPairs: false,
+      highlightActiveIndentation: false,
+    },
   })
 }
 
