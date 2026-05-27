@@ -106,9 +106,14 @@ export function createEditor(
     scrollBeyondLastLine: false,
     automaticLayout: true,
     tabSize: 2,
-    wordWrap: 'on',
+    wordWrap: 'off',
+    scrollBeyondLastColumn: 8,
+    scrollbar: {
+      horizontal: 'auto',
+      vertical: 'auto',
+      useShadows: false,
+    },
     padding: { top: 8 },
-    // Mobile: bigger touch targets
     lineDecorationsWidth: 8,
     renderLineHighlight: 'line',
   })
