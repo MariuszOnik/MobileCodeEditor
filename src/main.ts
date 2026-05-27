@@ -3,6 +3,7 @@ import { createEditor, getLanguage, monaco, type EditorLanguage } from './editor
 import { readFile, writeFile, listFiles } from './fs/virtual-fs'
 import { FileTree } from './ui/file-tree'
 import { AssetPanel } from './ui/asset-panel'
+import { ConsolePanel } from './ui/console-panel'
 import { runCode, stopCode } from './runtime/runner'
 import { on, Events } from './ui/events'
 import CompilerWorker from './compiler/compiler.worker?worker'
@@ -30,6 +31,7 @@ const appEl       = document.getElementById('app')!
 const sidebarEl   = document.getElementById('sidebar')!
 const editorEl    = document.getElementById('editor-container')!
 const runEl       = document.getElementById('run-container')!
+const runIframeEl = document.getElementById('run-iframe-area')!
 const statusEl    = document.getElementById('status')!
 const tabEditor   = document.getElementById('tab-editor')!
 const tabRun      = document.getElementById('tab-run')!
@@ -45,6 +47,7 @@ let monacoEditor: ReturnType<typeof createEditor> | null = null
 let currentPath: string | null = null
 let fileTree: FileTree | null = null
 let assetPanel: AssetPanel | null = null
+let consolePanel: ConsolePanel | null = null
 let sidebarOpen = false
 
 // ── Init ─────────────────────────────────────────────────────────────────────
@@ -55,6 +58,18 @@ async function init() {
   await fileTree.refresh()
 
   assetPanel = new AssetPanel(document.getElementById('asset-panel')!)
+  consolePanel = new ConsolePanel(document.getElementById('console-panel')!)
+
+  // Receive console messages from iframe
+  window.addEventListener('message', (e) => {
+    if (!e.data?.__mce__) return
+    consolePanel!.log(e.data.level, e.data.msg)
+  })
+
+  // Console toggle button
+  document.getElementById('btn-console')!.addEventListener('click', () => {
+    consolePanel!.toggle()
+  })
 
   // Sidebar tabs: Pliki / Zasoby
   document.getElementById('stab-files')!.addEventListener('click', () => switchSidebarTab('files'))
@@ -80,7 +95,7 @@ async function init() {
   tabFiles.addEventListener('click',  () => toggleSidebar())
 
   btnRun.addEventListener('click',  runProject)
-  btnStop.addEventListener('click', () => { stopCode(runEl); setStatus('Zatrzymano', 'info') })
+  btnStop.addEventListener('click', () => { stopCode(runIframeEl); setStatus('Zatrzymano', 'info') })
   btnSave.addEventListener('click', saveCurrentFile)
   btnOpenDir.addEventListener('click', openNativeDir)
 
@@ -199,6 +214,7 @@ async function saveCurrentFile() {
 // ── Run ───────────────────────────────────────────────────────────────────────
 async function runProject() {
   await saveCurrentFile()
+  consolePanel?.clear()
   setStatus('Kompilowanie…', 'info')
   switchPanel('run')
 
@@ -220,7 +236,7 @@ async function runProject() {
   if (templateHtml) {
     const html = inlineLocalScripts(templateHtml, allFiles, folder)
     setStatus('Uruchomiono ▶ (HTML)', 'ok')
-    runCode({ html, container: runEl })
+    runCode({ html, container: runIframeEl})
     return
   }
 
@@ -234,7 +250,7 @@ async function runProject() {
   }
 
   setStatus('Uruchomiono ▶', 'ok')
-  runCode({ code: result.code!, container: runEl })
+  runCode({ code: result.code!, container: runIframeEl})
 }
 
 function inlineLocalScripts(html: string, files: Record<string, string>, folder: string): string {
